@@ -7,9 +7,9 @@ const querystring = require('querystring');
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const _const = require('const.js');
+const _config = require('./config.js');
 
-const ERRORS = _const.errors;
+const ERRORS = _config.errors;
 
 
 function Corrade(obj) {

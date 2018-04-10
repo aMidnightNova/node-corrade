@@ -6,7 +6,7 @@ const helpers = require('./lib/helpers.js');
 const Corrade = require('./corrade.js');
 
 
-let corrade = new Corrade(config);
+let corrade = new Corrade(_config);
 
 
 corrade.on('message', function (data) {
