@@ -3,12 +3,12 @@ const querystring = require('querystring');
 
 const Log = require('../lib/logs.js');
 
-const BASE = 'https://bot.endlessworlds.io';
-
 const axios = require('axios');
 const Promise = require('bluebird');
 
 const _config = require('../config.js');
+
+const BASE = _config.baseUrl;
 
 const helpers = require('../lib/helpers.js');
 
