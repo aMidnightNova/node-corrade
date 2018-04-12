@@ -1,9 +1,6 @@
 
 let config = {};
 
-config.baseUrl = '';
-
-
 config.server = 'bot.example.com';
 config.protocol = 'https';
 config.group = 'MySlGroup';
@@ -14,7 +11,9 @@ config.basicAuth = {
 };
 config.types = ['group', 'message'];
 
-
+config.fullUrl = function () {
+    return config.protocol + '://' + config.server;
+};
 
 config.errors = [
     {code: 0, text: 'arguments need to be 4 or more characters'},

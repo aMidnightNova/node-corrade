@@ -1,4 +1,3 @@
-
 const querystring = require('querystring');
 
 const Log = require('../lib/logs.js');
@@ -6,9 +5,8 @@ const Log = require('../lib/logs.js');
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const _config = require('../config.js');
+const _config = require('../corradeConfig.js');
 
-const BASE = _config.baseUrl;
 
 const helpers = require('../lib/helpers.js');
 
@@ -18,7 +16,7 @@ let auth = {};
 auth.isAuthorized = function (requestData) {
     return new Promise(function (resolve, reject) {
 
-        return axios.post(BASE, querystring.stringify({
+        return axios.post(_config.fullUrl, querystring.stringify({
                 command: 'getmemberroles',
                 group: _config.group,
                 password: _config.password,

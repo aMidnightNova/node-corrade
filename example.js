@@ -1,5 +1,5 @@
 
-const _config = require('./config.js');
+const _config = require('./corradeConfig.js');
 const ERRORS = _config.errors;
 
 const helpers = require('./lib/helpers.js');

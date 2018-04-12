@@ -1,6 +1,6 @@
 {
   "name": "node-corrade",
-  "description": "Librare and TCP connection for corrade",
+  "description": "Library and TCP connection for corrade",
   "version": "0.0.1",
   "private": true,
   "dependencies": {
@@ -8,5 +8,8 @@
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "moment-timezone": "^0.5.14"
+  },
+  "scripts": {
+    "postinstall" : "node ./copy.js"
   }
 }

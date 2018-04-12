@@ -7,9 +7,11 @@ const querystring = require('querystring');
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const _config = require('./config.js');
+const _config = require('./corradeConfig.js');
 
 const ERRORS = _config.errors;
+
+const Auth = require('./models/Auth.js')
 
 
 function Corrade(obj) {
@@ -109,6 +111,9 @@ function Corrade(obj) {
             console.log('axios query error', e);
         })
     };
+
+
+    this.isAuthorized = Auth.isAuthorized;
 
 
 }
