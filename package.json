@@ -2,7 +2,7 @@
   "name": "node-corrade",
   "description": "Library and TCP connection for corrade",
   "version": "0.0.1",
-  "private": true,
+  "private": false,
   "dependencies": {
     "axios": "^0.16.2",
     "bluebird": "^3.5.1",

@@ -11,7 +11,7 @@ const _config = require('./corradeConfig.js');
 
 const ERRORS = _config.errors;
 
-const Auth = require('./models/Auth.js')
+const Auth = require('./models/Auth.js');
 
 
 function Corrade(obj) {
