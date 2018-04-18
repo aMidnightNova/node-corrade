@@ -115,12 +115,10 @@ function Corrade(obj) {
 
 
     this.isAuthorized = Auth.isAuthorized;
+    this.Helpers = helpers;
+    this.Logs = Logs;
 
 
 }
 
-module.exports = {
-    Corrade: Corrade,
-    helpers: helpers,
-    Logs: Logs
-};
+module.exports = Corrade;
