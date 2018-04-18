@@ -12,7 +12,8 @@ const _config = require('./corradeConfig.js');
 const ERRORS = _config.errors;
 
 const Auth = require('./models/Auth.js');
-
+const helpers = require('./lib/helpers.js');
+const Logs = require('./lib/Logs.js');
 
 function Corrade(obj) {
     let _this = this;
@@ -118,4 +119,8 @@ function Corrade(obj) {
 
 }
 
-module.exports = Corrade;
+module.exports = {
+    Corrade: Corrade,
+    helpers: helpers,
+    Logs: Logs
+};
