@@ -1,13 +1,13 @@
 
-const _config = require('./corradeConfig.js');
+const _config = require('../../corradeConfig.js');
 const ERRORS = _config.errors;
 
-const helpers = require('./lib/helpers.js');
+
 const Corrade = require('node-corrade');
 
 
 let corrade = new Corrade(_config);
-
+let helpers = corrade.Helpers;
 
 corrade.on('message', function (data) {
     console.log(data);

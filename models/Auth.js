@@ -5,7 +5,7 @@ const Log = require('../lib/logs.js');
 const axios = require('axios');
 const Promise = require('bluebird');
 
-const _config = require('../corradeConfig.js');
+const _config = require('../../../corradeConfig.js');
 
 
 const helpers = require('../lib/helpers.js');
