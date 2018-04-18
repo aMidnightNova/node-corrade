@@ -3,6 +3,7 @@
   "description": "Library and TCP connection for corrade",
   "version": "0.0.1",
   "private": false,
+  "main": "corrade.js",
   "dependencies": {
     "axios": "^0.16.2",
     "bluebird": "^3.5.1",
@@ -10,6 +11,6 @@
     "moment-timezone": "^0.5.14"
   },
   "scripts": {
-    "postinstall" : "node ./copy.js"
+    "postinstall": "node ./copy.js"
   }
 }
