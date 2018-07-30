@@ -9,6 +9,7 @@ config.basicAuth = {
     user: 'basicAuthUserName',
     password: 'YourSuperStrongPassword'
 };
+config.port = 9000;
 config.types = ['group', 'message'];
 
 config.fullUrl = function () {
