@@ -17,18 +17,23 @@ const Logs = require('./lib/Logs.js');
 
 function Corrade(obj) {
     let _this = this;
-    this.server = obj.server;
+
     this.protocol = obj.protocol;
     this.group = obj.group;
     this.password = obj.password;
     this.types = obj.types;
     this.basicAuth = obj.basicAuth || null;
-    this.port = obj.port;
+
+    this.options = {
+        port: obj.port,
+        host: obj.host,
+        rejectUnauthorized: obj.rejectUnauthorized || true
+    };
 
     let emitter = new EventEmitter();
 
-    function createSocket(server, port, group, password, types) {
-        let corradeSocket = tls.connect(port, server, function () {
+    function createSocket(options, group, password, types) {
+        let corradeSocket = tls.connect(options, function () {
             corradeSocket.write('group=' + group + '&password=' + password + '&type=' + types.toString() + '\r\n');
         });
         corradeSocket.setKeepAlive(true);
@@ -62,13 +67,13 @@ function Corrade(obj) {
         });
         corradeSocket.on('close', function () {
             console.log('CONNECTION CLOSED: attempting to reestablish...');
-            corradeSocket = createSocket(_this.server, _this.port, _this.group, _this.password, _this.types);
+            corradeSocket = createSocket(_this.options, _this.group, _this.password, _this.types);
         });
 
         return corradeSocket;
     }
 
-    createSocket(this.server, this.port, this.group, this.password, this.types);
+    createSocket(this.options, this.group, this.password, this.types);
 
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);

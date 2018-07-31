@@ -1,7 +1,7 @@
 
 let config = {};
 
-config.server = 'bot.example.com';
+config.host = 'bot.example.com';
 config.protocol = 'https';
 config.group = 'MySlGroup';
 config.password = 'YourSuperStrongPassword';
@@ -10,10 +10,11 @@ config.basicAuth = {
     password: 'YourSuperStrongPassword'
 };
 config.port = 9000;
+config.rejectUnauthorized = true;
 config.types = ['group', 'message'];
 
 config.fullUrl = function () {
-    return config.protocol + '://' + config.server;
+    return config.protocol + '://' + config.host;
 };
 
 config.errors = [
