@@ -27,7 +27,7 @@ function Corrade(obj) {
     this.options = {
         port: obj.port,
         host: obj.host,
-        rejectUnauthorized: obj.rejectUnauthorized || true
+        rejectUnauthorized: obj.rejectUnauthorized ? true : obj.rejectUnauthorized
     };
 
     let emitter = new EventEmitter();
