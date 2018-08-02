@@ -1,5 +1,6 @@
 const EventEmitter = require('events').EventEmitter;
 const tls = require('tls');
+const rl = require('readline');
 
 const querystring = require('querystring');
 
@@ -27,7 +28,7 @@ function Corrade(obj) {
     this.options = {
         port: obj.port,
         host: obj.host,
-        rejectUnauthorized: obj.rejectUnauthorized ? true : obj.rejectUnauthorized
+        rejectUnauthorized: typeof obj.rejectUnauthorized !== 'undefined' ? obj.rejectUnauthorized : false
     };
 
     let emitter = new EventEmitter();
@@ -39,16 +40,18 @@ function Corrade(obj) {
         corradeSocket.setKeepAlive(true);
         corradeSocket.setEncoding('utf8');
 
-        corradeSocket.on('data', function (data) {
-            let parsedDate = querystring.parse(data.replace(/\r?\n|\r/g, ''));
+        let rlInterface = rl.createInterface(corradeSocket,corradeSocket);
+
+        rlInterface.on('line', function (line) {
+            let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
             if (parsedDate.success === 'True') {
                 console.log('Corrade Is Ready!');
             }
-            if (parsedDate.message) {
-                emitter.emit('data', parsedDate);
+            if (parsedDate) {
+                emitter.emit('line', parsedDate);
             }
-
         });
+
 
         corradeSocket.on('end', function () {
             console.log('Fin');
@@ -78,8 +81,8 @@ function Corrade(obj) {
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
 
-        emitter.on('data', function (data) {
-            if (data.message && data.type === type) {
+        emitter.on('line', function (data) {
+            if (data.type === type) {
                 cb(data)
             }
         })
