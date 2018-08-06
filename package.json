@@ -8,9 +8,7 @@
     "axios": "^0.16.2",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
-    "moment-timezone": "^0.5.14"
-  },
-  "scripts": {
-    "postinstall": "node ./copy.js"
+    "moment-timezone": "^0.5.14",
+    "yargs-parser": "^10.1.0"
   }
 }
