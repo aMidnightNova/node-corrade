@@ -123,7 +123,6 @@ function Corrade(obj) {
                 return Promise.reject(ERRORS[9]);
             }
             if(parsedData.success === 'False') {
-                console.log('here i am yes am i')
                 let errorMsg = {
                     code: ERRORS[10].code,
                     text: ERRORS[10].text + ' ERROR: '+parsedData.error
@@ -132,7 +131,7 @@ function Corrade(obj) {
                 return Promise.reject(errorMsg)
             }
 
-            return querystring.parse(res.data).data;
+            return Promise.resolve(parsedData);
         },function (err) {
             console.log(err)
         })
