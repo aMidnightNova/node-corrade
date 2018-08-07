@@ -7,5 +7,7 @@ module.exports = [
     {code: 5, text: 'invalid bot origin'},
     {code: 6, text: 'invalid argument, please provide a single name as a string'},
     {code: 7, text: 'not authorized to use this command'},
-    {code: 8, text: 'not the correct method to use this command: I.M. the bot or in group chat.'}
+    {code: 8, text: 'not the correct method to use this command: I.M. the bot or in group chat.'},
+    {code: 9, text: 'query error, no data returned'},
+    {code: 10, text: 'query failure.'}
 ];

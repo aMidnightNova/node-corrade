@@ -117,10 +117,24 @@ function Corrade(obj) {
 
         return axios.post(_this.protocol + '://' + _this.host, querystring.stringify(options), maybeBasicAuth
         ).then(function (res) {
-            if (!res.data) return Promise.reject(ERRORS[2]);
+            let parsedData = querystring.parse(res.data);
+            console.log(parsedData)
+            if(!parsedData){
+                return Promise.reject(ERRORS[9]);
+            }
+            if(parsedData.success === 'False') {
+                console.log('here i am yes am i')
+                let errorMsg = {
+                    code: ERRORS[10].code,
+                    text: ERRORS[10].text + ' ERROR: '+parsedData.error
+                };
+
+                return Promise.reject(errorMsg)
+            }
+
             return querystring.parse(res.data).data;
-        }).catch(function (e) {
-            console.log('axios query error', e);
+        },function (err) {
+            console.log(err)
         })
     };
 
@@ -145,8 +159,7 @@ function Corrade(obj) {
         }
 
         if (_this.REGISTERED_MODULES[moduleName].authorizedRoles !== null) {
-
-            auth.isAuthorized(_this, _this.REGISTERED_MODULES[moduleName].authorizedRoles, params).then(function () {
+           return auth.isAuthorized(_this, _this.REGISTERED_MODULES[moduleName].authorizedRoles, params).then(function () {
                 return _this.REGISTERED_MODULES[moduleName].func(_this, params);
             }, function (err) {
                 _this.logs.append(err, 'access.log');

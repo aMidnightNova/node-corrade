@@ -14,7 +14,7 @@ joke.func = function (_this,params) {
         fs.readFile( './files/jokes.txt', 'utf8', function (err, res) {
             if (err) throw err;
             let lines = res.split('\n');
-            resolve(lines[helpers.randomNumber(0, lines.length)].replace(/\r?\n|\r/g));
+            resolve(lines[helpers.randomNumber(0, lines.length)]);
         })
 
     })

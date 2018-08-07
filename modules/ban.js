@@ -16,7 +16,7 @@ ban.func = function (_this, params) {
     }
     if(typeof banInfo.action === 'undefined') {
         return Promise.reject({code:110,text:'please include and action.'});
-    } else if(banInfo.action !== 'add' || banInfo.action !== 'remove') {
+    } else if(['add','remove'].indexOf(banInfo.action) === -1) {
         return Promise.reject({code:111,text:'action is not valid. please use one: [add,remove].'});
     }
     if(typeof banInfo.reason === 'undefined') {
@@ -24,7 +24,7 @@ ban.func = function (_this, params) {
     }
 
     let firstAndLast = banInfo.name.split(' ');
-
+    console.log("banInfo.action",banInfo.action);
     return _this.query({
         command: 'setestatelist',
         type: 'ban',
@@ -32,6 +32,12 @@ ban.func = function (_this, params) {
         firstname: firstAndLast[0],
         lastname: firstAndLast[1]
 
+    }).then(function (res) {
+        console.log('BAN res',res)
+        //return res
+    },function (err) {
+        console.log('BAN err',err)
+        return Promise.reject(err)
     })
 
 };
