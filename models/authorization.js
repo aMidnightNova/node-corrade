@@ -31,9 +31,7 @@ authorization.isAuthorized = function (_this, allowedRoles, requestData) {
             let parsedResponse = querystring.parse(res.data);
 
             if (parsedResponse.error === 'agent not in group') {
-                reject('Unauthorized, REASON: ' + parsedResponse.error + ', REQUESTED BY: ' +
-                    requestData.firstName + ' ' + requestData.lastName +
-                    ', MESSAGE: ' + requestData.messageAsString);
+                reject('agent not in group');
                 return;
             }
 
@@ -43,9 +41,7 @@ authorization.isAuthorized = function (_this, allowedRoles, requestData) {
                 return groupRoles.includes(value);
             });
             if (!hasAuth) {
-                reject('Unauthorized, REASON: not in staff role. REQUESTED BY: ' +
-                    requestData.firstName + ' ' + requestData.lastName +
-                    ', MESSAGE: ' + requestData.messageAsString);
+                reject('not in an authorized role');
                 return;
 
             }

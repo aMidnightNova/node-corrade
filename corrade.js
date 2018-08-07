@@ -118,7 +118,7 @@ function Corrade(obj) {
         return axios.post(_this.protocol + '://' + _this.host, querystring.stringify(options), maybeBasicAuth
         ).then(function (res) {
             let parsedData = querystring.parse(res.data);
-            console.log(parsedData)
+
             if(!parsedData){
                 return Promise.reject(ERRORS[9]);
             }
@@ -162,7 +162,7 @@ function Corrade(obj) {
                 return _this.REGISTERED_MODULES[moduleName].func(_this, params);
             }, function (err) {
                 _this.logs.append(err, 'access.log');
-                return ERRORS[7];
+                return Promise.reject(ERRORS[7]);
             })
 
         }
@@ -251,7 +251,7 @@ function Corrade(obj) {
                 });
 
             }
-            return //reject(ERRORS[1])
+            return reject(ERRORS[1])
         })
     };
 
