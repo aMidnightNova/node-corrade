@@ -5,7 +5,6 @@ const helpers = require('../lib/helpers.js');
 let joke = {};
 
 joke.name = 'joke';
-joke.needsAuthorization = true;
 
 joke.help = '[@~]joke :tells a joke from the joke library.';
 

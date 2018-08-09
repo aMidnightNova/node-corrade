@@ -1,4 +1,3 @@
-const EventEmitter = require('events').EventEmitter;
 const tls = require('tls');
 const rl = require('readline');
 
@@ -15,45 +14,74 @@ const auth = require('./models/authorization.js');
 const helpers = require('./lib/helpers.js');
 const logs = require('./lib/Logs.js');
 
-function Corrade(obj) {
+/**
+ * Create an object that will interact with your corrade bot.
+ * @class
+ * @param {object} config - Configuration options needed to establish a TCP connection with the corrade bot.
+ * @param {string} config.protocol - The protocol that you will use: http, https.
+ * @param {string} config.host - fqdn hostname or ip where the corrade bot is.
+ * @param {number} config.port - The port the tcp connection is on.
+ * @param {string} config.group - Second Life group name.
+ * @param {string} config.password - Second Life Corrade group password.
+ * @param {array} config.types - array of notification types you will subscribe to.
+ * @param {object} config.basicAuth - http basic auth credentials.
+ * @param {string} config.basicAuth.user - http basis auth username.
+ * @param {string} config.basicAuth.password - http basic auth password.
+
+ * @example
+ * let config = {};
+ * config.host = 'bot.example.com';
+ * config.protocol = 'https';
+ * config.group = 'MyGroupHere';
+ * config.password = 'SuperAwesomeStrongPassword';
+ * config.basicAuth = {
+ *     user: 'corrade',
+ *     password: 'Somepassword'
+ * };
+ * config.port = 9000;
+ * config.types = ['group', 'message', 'statistics'];
+ *
+ *
+ * let Corrade = require('./corrade.js');
+ * let corrade = new Corrade(config);
+ */
+function Corrade(config) {
     let _this = this;
 
-    this.protocol = obj.protocol;
-    this.group = obj.group;
-    this.password = obj.password;
-    this.types = obj.types;
-    this.basicAuth = typeof obj.basicAuth !== 'undefined' ? obj.basicAuth : null;
-    this.host = obj.host;
-    this.port = obj.port;
+    this.protocol = config.protocol;
+    this.host = config.host;
+    this.port = config.port;
+    this.group = config.group;
+    this.password = config.password;
+    this.types = config.types;
+    this.basicAuth = typeof config.basicAuth !== 'undefined' ? config.basicAuth : null;
+
 
     this.options = {
-        port: obj.port,
-        host: obj.host
+        host: config.host,
+        port: config.port
         //      rejectUnauthorized: typeof obj.rejectUnauthorized !== 'undefined' ? obj.rejectUnauthorized : false
     };
+
+    /**
+     * Object containing registered modules.
+     * @var {Object} REGISTERED_MODULES
+     */
     this.REGISTERED_MODULES = {};
 
-    let emitter = new EventEmitter();
 
+    /**
+     * Establishes TCP connection with corrade.
+     * @private
+     * @memberOf Corrade
+     * @returns {Object} - returns tls socket object that emits events.
+     */
     function createSocket(options, group, password, types) {
         let corradeSocket = tls.connect(options, function () {
             corradeSocket.write('group=' + group + '&password=' + password + '&type=' + types.toString() + '\r\n');
         });
         corradeSocket.setKeepAlive(true);
         corradeSocket.setEncoding('utf8');
-
-        let rlInterface = rl.createInterface(corradeSocket, corradeSocket);
-
-        rlInterface.on('line', function (line) {
-            let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
-            if (parsedDate.success === 'True') {
-                console.log('Corrade Is Ready!');
-            }
-            if (parsedDate) {
-                emitter.emit('line', parsedDate);
-            }
-        });
-
 
         corradeSocket.on('end', function () {
             console.log('Fin');
@@ -75,19 +103,33 @@ function Corrade(obj) {
             corradeSocket = createSocket(_this.options, _this.group, _this.password, _this.types);
         });
 
-        return corradeSocket;
+        return rl.createInterface(corradeSocket, corradeSocket);
     }
 
-    createSocket(this.options, this.group, this.password, this.types);
+    this.corradeTCPSocket = createSocket(this.options, this.group, this.password, this.types);
+
+    /**
+     * Snowball event.
+     *
+     * @event Corrade#line
+     * @type {object}
+     * @property {boolean} isPacked - Indicates whether the snowball is tightly packed.
+     */
 
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
 
-        emitter.on('line', function (data) {
-            if (data.type === type) {
-                cb(data)
+        _this.corradeTCPSocket.on('line', function (line) {
+            let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
+            if (parsedDate.success === 'True') {
+                console.log('Corrade Is Ready!');
             }
-        })
+            if (parsedDate) {
+                if (parsedDate.type === type) {
+                    cb(parsedDate)
+                }
+            }
+        });
     };
 
 
@@ -119,27 +161,27 @@ function Corrade(obj) {
         ).then(function (res) {
             let parsedData = querystring.parse(res.data);
 
-            if(!parsedData){
+            if (!parsedData) {
                 return Promise.reject(ERRORS[9]);
             }
-            if(parsedData.success === 'False') {
+            if (parsedData.success === 'False') {
                 let errorMsg = {
                     code: ERRORS[10].code,
-                    text: ERRORS[10].text + ' ERROR: '+parsedData.error
+                    text: ERRORS[10].text + ' ERROR: ' + parsedData.error
                 };
 
                 return Promise.reject(errorMsg)
             }
 
             return Promise.resolve(parsedData);
-        },function (err) {
+        }, function (err) {
             console.log(err)
         })
     };
 
     this.loadModules = function (modules, authorizedRoles, allowedTypes) {
 
-        modules.forEach(function (item, index, arr) {
+        modules.forEach(function (item, index, arr) {//TODO: add check to make sure modules dont have the same name.
             _this.REGISTERED_MODULES[item.name] = {
                 authorizedRoles: Array.isArray(authorizedRoles) ? authorizedRoles : null,
                 allowedTypes: Array.isArray(allowedTypes) ? allowedTypes : null,
@@ -153,12 +195,12 @@ function Corrade(obj) {
 
     };
     this.runModule = function (moduleName, params) {
-        if(_this.REGISTERED_MODULES[moduleName].allowedTypes.indexOf(params.type) === -1 || _this.REGISTERED_MODULES[moduleName].allowedTypes === null) {
+        if (_this.REGISTERED_MODULES[moduleName].allowedTypes.indexOf(params.type) === -1 || _this.REGISTERED_MODULES[moduleName].allowedTypes === null) {
             return Promise.reject(ERRORS[8]);
         }
 
         if (_this.REGISTERED_MODULES[moduleName].authorizedRoles !== null) {
-           return auth.isAuthorized(_this, _this.REGISTERED_MODULES[moduleName].authorizedRoles, params).then(function () {
+            return auth.isAuthorized(_this, _this.REGISTERED_MODULES[moduleName].authorizedRoles, params).then(function () {
                 return _this.REGISTERED_MODULES[moduleName].func(_this, params);
             }, function (err) {
                 _this.logs.append(err, 'access.log');
@@ -251,7 +293,7 @@ function Corrade(obj) {
                 });
 
             }
-            return reject(ERRORS[1])
+            // return reject(ERRORS[1])//TODO: check if this is needed or to never resolve a promise is okay.
         })
     };
 

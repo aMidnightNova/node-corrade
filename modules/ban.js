@@ -4,7 +4,6 @@ const parser = require('yargs-parser');
 let ban = {};
 
 ban.name = 'ban';
-ban.needsAuthorization = true;
 
 ban.help = '[@~]ban (required)--action=[add|remove] (required, legacy name)--name="FirstName LastName" (required)--reason="naughty boy" :Bans a person from the estate.';
 
