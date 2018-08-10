@@ -74,7 +74,7 @@ function Corrade(config) {
      * Establishes TCP connection with corrade.
      * @private
      * @memberOf Corrade
-     * @returns {Object} - returns tls socket object that emits events.
+     * @returns {Object} - returns readline interface object that emits events.
      */
     function createSocket(options, group, password, types) {
         let corradeSocket = tls.connect(options, function () {
@@ -106,20 +106,20 @@ function Corrade(config) {
         return rl.createInterface(corradeSocket, corradeSocket);
     }
 
-    this.corradeTCPSocket = createSocket(this.options, this.group, this.password, this.types);
+    this.corradeTCPInterface = createSocket(this.options, this.group, this.password, this.types);
 
     /**
      * Snowball event.
      *
      * @event Corrade#line
-     * @type {object}
-     * @property {boolean} isPacked - Indicates whether the snowball is tightly packed.
+     * @type {string}
+     * @property {string} parsedDate - returns data that is emitted from the tcp Interface.
      */
 
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
 
-        _this.corradeTCPSocket.on('line', function (line) {
+        _this.corradeTCPInterface.on('line', function (line) {
             let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
             if (parsedDate.success === 'True') {
                 console.log('Corrade Is Ready!');
@@ -131,6 +131,21 @@ function Corrade(config) {
             }
         });
     };
+    /** @function Corrade~query
+     *
+     * @param {object} options - case specific options needed to send a http(s) query to corrade.
+     * @param {boolean} autoEscape - querystring escape all contents of the options object.
+     * @returns {Promise} parsedData - returns a promise object which will contain querystring parsed data, is csv format.
+     *
+     *
+     * @example
+     * corrade.query({
+     *     command: 'tell',
+     *     entity: 'avatar',
+     *     agent: <agent uuid>,
+     *     message: 'Some Text Here'
+     * }, false)
+     * */
 
 
     this.query = function (options, autoEscape) {
@@ -179,6 +194,17 @@ function Corrade(config) {
         })
     };
 
+
+    /** @function Corrade~loadModules
+     *
+     * @param {array} modules - array of modules to load.
+     * @param {array} authorizedRoles - array of authorized group roles from your second life group that have access to this module.
+     * @param {array} allowedTypes - notification types this belongs to.
+     *
+     *
+     * @example
+     * corrade.loadModules([ban], ['Staff', 'Owners'], ['message']);
+     * */
     this.loadModules = function (modules, authorizedRoles, allowedTypes) {
 
         modules.forEach(function (item, index, arr) {//TODO: add check to make sure modules dont have the same name.
@@ -186,7 +212,7 @@ function Corrade(config) {
                 authorizedRoles: Array.isArray(authorizedRoles) ? authorizedRoles : null,
                 allowedTypes: Array.isArray(allowedTypes) ? allowedTypes : null,
                 name: item.name,
-                help: Array.isArray(authorizedRoles) ? item.help + '| Restricted to: ' + authorizedRoles.toString() : item.help,
+                help: Array.isArray(authorizedRoles) ? item.help + ' | Restricted to: ' + authorizedRoles.join(', ') : item.help,
                 func: item.func,
             };
 
@@ -194,6 +220,17 @@ function Corrade(config) {
 
 
     };
+
+    /** @function Corrade~runModule
+     *
+     * @param {string} moduleName - string name of the registered module.
+     * @param {object} params - object of data for the module to run.
+     * @returns {Promise} returns a promise object which will contain the data of the registered function after it runs.
+     *
+     *
+     * @example
+     * corrade.loadModules([ban], ['Staff', 'Owners'], ['message']);
+     * */
     this.runModule = function (moduleName, params) {
         if (_this.REGISTERED_MODULES[moduleName].allowedTypes.indexOf(params.type) === -1 || _this.REGISTERED_MODULES[moduleName].allowedTypes === null) {
             return Promise.reject(ERRORS[8]);
@@ -216,6 +253,17 @@ function Corrade(config) {
     this.helpers = helpers;
     this.logs = logs;
 
+    /** @function Corrade~corradeGetGroupMembersByName
+     *
+     * @param {array} arrayOfNames - array of legacy names or partial names.
+     * @returns {Promise} returns a promise object which will contain a csv of names unless any one of the names do not match.
+     *
+     *
+     * @example
+     * corrade.corradeGetGroupMembersByName(['bunny','bob','sunny']).then(function (res) {
+     *              //do things
+     *          });
+     * */
     this.corradeGetGroupMembersByName = function (arrayOfNames) {
 
         let len = arrayOfNames.length;
@@ -243,6 +291,18 @@ function Corrade(config) {
             return res;
         });
     };
+
+    /** @function Corrade~corradeGetGroupMemberByName
+     *
+     * @param {string} singleName -single legacy name or partial name.
+     * @returns {Promise} returns a promise object which will contain the full name unless it does not match anyone in the group.
+     *
+     *
+     * @example
+     * corrade.corradeGetGroupMembersByName('bunny').then(function (res) {
+     *              //do things
+     *          });
+     * */
     this.corradeGetGroupMemberByName = function (singleName) {
 
         if (typeof singleName !== 'string') return Promise.reject(ERRORS[6]);
@@ -255,7 +315,21 @@ function Corrade(config) {
         })
     };
 
-
+    /** @function Corrade~checkIfCommandAndReturnFormattedData
+     *
+     * @description
+     * expects the initial message from corrade (ater its been trasformed though querystring)  to go into this function then formats the data to be more
+     * javascript friendly if the first part of the message string is a command.
+     *
+     * @param {object} data - corrade data object.
+     * @returns {Promise} returns a promise object which will contain the firstName, lastName, messageAsString, messageAsArray, command, uuid, and type paramaters.
+     *
+     *
+     * @example
+     * corrade.corradeGetGroupMembersByName('bunny').then(function (res) {
+     *              //do things
+     *          });
+     * */
     this.checkIfCommandAndReturnFormattedData = function (data) {
 
         //let messageAsArray = split(data.message, {separator: ' ',keepQuotes: false});

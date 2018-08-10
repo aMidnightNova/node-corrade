@@ -5,7 +5,7 @@ let ban = {};
 
 ban.name = 'ban';
 
-ban.help = '[@~]ban (required)--action=[add|remove] (required, legacy name)--name="FirstName LastName" (required)--reason="naughty boy" :Bans a person from the estate.';
+ban.help = '[@~]ban --action=[add|remove] --name="Legacy Name" --reason="naughty boy" : all fields required, adds or removes a person from the estate ban list.';
 
 ban.func = function (_this, params) {
     const banInfo = parser(params.messageAsString);
@@ -23,7 +23,7 @@ ban.func = function (_this, params) {
     }
 
     let firstAndLast = banInfo.name.split(' ');
-    console.log("banInfo.action", banInfo.action);
+
     return _this.query({
         command: 'setestatelist',
         type: 'ban',
