@@ -274,9 +274,8 @@ function Corrade(config) {
                 command: 'getmembers',
                 sift: 'match,' + querystring.escape('(?i),?\\"([^\\",$]*' + arrayOfNames[i] + '[^\",$]*)\",?')
             }, false).then(function (res) {
-                console.log('potato', res);
                 if (!res) return Promise.reject(ERRORS[2]);
-                return res.replace(/["']/g, '');
+                return res.data.replace(/["']/g, '');
             }));
         }
 
