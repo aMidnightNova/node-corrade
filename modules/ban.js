@@ -32,10 +32,10 @@ ban.func = function (_this, params) {
         lastname: firstAndLast[1]
 
     }).then(function (res) {
-        _this.logs.append('ACTION: '+banInfo.action+', BY: '+params.firstName +' '+params.lastName + ', REASON: '+ banInfo.reason, 'ban.log');
-        return Promise.resolve('the action \"'+banInfo.action+'\" for '+banInfo.name + ' has been completed for the estate ban list.');
+        _this.logs.append('ACTION: ' + banInfo.action + ', WHO: ' + banInfo.name  +', BY: ' + params.firstName + ' ' + params.lastName + ', REASON: ' + banInfo.reason, 'ban.log');
+        return Promise.resolve('the action \"' + banInfo.action + '\" for ' + banInfo.name + ' has been completed for the estate ban list.');
     }, function (err) {
-        _this.logs.append(err,'error.log');
+        _this.logs.append(err, 'error.log');
         return Promise.reject(err)
     })
 

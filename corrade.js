@@ -70,6 +70,18 @@ function Corrade(config) {
     this.REGISTERED_MODULES = {};
 
 
+    function handleReceivedLine(line) {
+        let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
+
+        let listeners = listenersByType[parsedDate.type];
+
+        if (listeners) {
+            listeners.forEach(function (item,index, arr) {
+                 item(parsedDate);
+            });
+        }
+    }
+
     /**
      * Establishes TCP connection with corrade.
      * @private
@@ -88,49 +100,47 @@ function Corrade(config) {
         });
 
         corradeSocket.on('error', function (e) {
-            if (e &&
-                e.errno === 'ECONNRESET' ||
-                e.errno === 'ETIMEDOUT' ||
-                e.errno === 'ENOTFOUND' ||
-                e.errno === 'ENOENT') {
-
-                console.log('CONNECTION ERROR');
-            }
+            // if (e &&
+            //     e.errno === 'ECONNRESET' ||
+            //     e.errno === 'ETIMEDOUT' ||
+            //     e.errno === 'ENOTFOUND' ||
+            //     e.errno === 'ENOENT') {
+            //
+            //     console.log('CONNECTION ERROR');
+            // }
             console.log(e.Error, e.code, e.errno);
         });
         corradeSocket.on('close', function () {
-            console.log('CONNECTION CLOSED: attempting to reestablish...');
-            corradeSocket = createSocket(_this.options, _this.group, _this.password, _this.types);
+            console.log((new Date()).toLocaleTimeString('en-US'),'CONNECTION CLOSED: attempting to reestablish...');
+           createSocket(_this.options, _this.group, _this.password, _this.types);
         });
 
-        return rl.createInterface(corradeSocket, corradeSocket);
-    }
+        let rlInterface = rl.createInterface(corradeSocket, corradeSocket);
 
-    this.corradeTCPInterface = createSocket(this.options, this.group, this.password, this.types);
+        rlInterface.on('line', function (line) {
+            handleReceivedLine(line)
+        });
 
+
+    } createSocket(this.options, this.group, this.password, this.types);
+    
+
+    let listenersByType = {};
     /**
-     * Snowball event.
+     * corrade emit event.
      *
      * @event Corrade#line
      * @type {string}
      * @property {string} parsedDate - returns data that is emitted from the tcp Interface.
      */
-
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
-
-        _this.corradeTCPInterface.on('line', function (line) {
-            let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
-            if (parsedDate.success === 'True') {
-                console.log('Corrade Is Ready!');
-            }
-            if (parsedDate) {
-                if (parsedDate.type === type) {
-                    cb(parsedDate)
-                }
-            }
-        });
+        if(!listenersByType[type]) {
+            listenersByType[type] = [];
+        }
+        listenersByType[type].push(cb);
     };
+
     /** @function Corrade~query
      *
      * @param {object} options - case specific options needed to send a http(s) query to corrade.
@@ -280,7 +290,6 @@ function Corrade(config) {
         }
 
         return axios.all(calls).then(function (res) {
-            console.log('RES', res);
 
             res.forEach(function (item, index, arr) {
                 if (!item) {
@@ -361,7 +370,7 @@ function Corrade(config) {
                     messageAsArray: messageAsArray,
                     messageAsString: data.message.match(/^(\S+)\s(.*)/) ? data.message.match(/^(\S+)\s(.*)/).slice(1)[1] : data.message,
                     command: command,
-                    uuid: data.agent,
+                    uuid: data.agent || data.owner ? data.agent || data.owner : null,
                     type: data.type
                 });
 
