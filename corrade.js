@@ -12,7 +12,7 @@ const ERRORS = require('./errors.js');
 
 const auth = require('./models/authorization.js');
 const helpers = require('./lib/helpers.js');
-const logs = require('./lib/Logs.js');
+const logs = require('./lib/logs.js');
 
 /**
  * Create an object that will interact with your corrade bot.
@@ -68,6 +68,7 @@ function Corrade(config) {
      * @var {Object} REGISTERED_MODULES
      */
     this.REGISTERED_MODULES = {};
+    this.INTERVALS = [];
 
 
     function handleReceivedLine(line) {
@@ -76,8 +77,8 @@ function Corrade(config) {
         let listeners = listenersByType[parsedDate.type];
 
         if (listeners) {
-            listeners.forEach(function (item,index, arr) {
-                 item(parsedDate);
+            listeners.forEach(function (item, index, arr) {
+                item(parsedDate);
             });
         }
     }
@@ -111,19 +112,22 @@ function Corrade(config) {
             console.log(e.Error, e.code, e.errno);
         });
         corradeSocket.on('close', function () {
-            console.log((new Date()).toLocaleTimeString('en-US'),'CONNECTION CLOSED: attempting to reestablish...');
-           createSocket(_this.options, _this.group, _this.password, _this.types);
+            console.log((new Date()).toLocaleTimeString('en-US'), 'CONNECTION CLOSED: attempting to reestablish...');
+            rlInterface.close();
+            createSocket(_this.options, _this.group, _this.password, _this.types);
         });
 
         let rlInterface = rl.createInterface(corradeSocket, corradeSocket);
 
         rlInterface.on('line', function (line) {
-            handleReceivedLine(line)
+            handleReceivedLine(line);
         });
 
 
-    } createSocket(this.options, this.group, this.password, this.types);
-    
+    }
+
+    createSocket(this.options, this.group, this.password, this.types);
+
 
     let listenersByType = {};
     /**
@@ -135,7 +139,7 @@ function Corrade(config) {
      */
     this.on = function (type, cb) {
         if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
-        if(!listenersByType[type]) {
+        if (!listenersByType[type]) {
             listenersByType[type] = [];
         }
         listenersByType[type].push(cb);
@@ -341,7 +345,25 @@ function Corrade(config) {
     this.checkIfCommandAndReturnFormattedData = function (data) {
 
         //let messageAsArray = split(data.message, {separator: ' ',keepQuotes: false});
-        let messageAsArray = data.message.match(/(?:[^\s"]+|"[^"]*")+/g); //match(/[^\s"']+|"([^"]*)"|'([^']*)'/g);
+
+        let callbackUrl = null;
+        let maybeMessageAndCallbackUrl = querystring.parse(data.message);
+
+        let message = '';
+        if (maybeMessageAndCallbackUrl.message) {
+            message = maybeMessageAndCallbackUrl.message;
+            callbackUrl = maybeMessageAndCallbackUrl.callback_url;
+        } else {
+            message = data.message;
+        }
+
+
+        if (data.type === 'objectim') {
+            if (message && message.callback_url) callbackUrl = message.callback_url;
+        }
+
+
+        let messageAsArray = message.match(/(?:[^\s"]+|"[^"]*")+/g); //match(/[^\s"']+|"([^"]*)"|'([^']*)'/g);
 
 
         messageAsArray.forEach(function (item, index, arr) {
@@ -356,22 +378,31 @@ function Corrade(config) {
 
                 for (let i = 0; i < messageAsArray.length; ++i) {
                     if (messageAsArray[i].length < 4 && i !== 0) {
-                        return reject(ERRORS[0]);
+                        return reject({
+                            code: ERRORS[0].code,
+                            text: ERRORS[0].text,
+                            callbackUrl: callbackUrl
+                        });
                     }
                 }
 
                 if (!_this.REGISTERED_MODULES.hasOwnProperty(command)) {
-                    return reject(ERRORS[1]);
+                    return reject({
+                        code: ERRORS[1].code,
+                        text: ERRORS[1].text,
+                        callbackUrl: callbackUrl
+                    });
                 }
 
                 return resolve({
                     lastName: data.lastname,
                     firstName: data.firstname,
                     messageAsArray: messageAsArray,
-                    messageAsString: data.message.match(/^(\S+)\s(.*)/) ? data.message.match(/^(\S+)\s(.*)/).slice(1)[1] : data.message,
+                    messageAsString: message.match(/^(\S+)\s(.*)/) ? message.match(/^(\S+)\s(.*)/).slice(1)[1] : message,
                     command: command,
                     uuid: data.agent || data.owner ? data.agent || data.owner : null,
-                    type: data.type
+                    type: data.type,
+                    callbackUrl: callbackUrl
                 });
 
             }

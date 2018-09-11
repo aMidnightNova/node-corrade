@@ -1,6 +1,6 @@
 module.exports = [
     {code: 0, text: 'arguments need to be 4 or more characters'},
-    {code: 1, text: 'no command given'},
+    {code: 1, text: 'invalid command'},
     {code: 2, text: 'no one found by that name'},
     {code: 3, text: 'not subscribed too'},
     {code: 4, text: 'to many matches, be more specific'},
