@@ -71,7 +71,7 @@ function Corrade(config) {
     this.INTERVALS = [];
 
 
-    function handleReceivedLine(line) {
+    function handleReceivedLine(line) { // it is safe to have [Object: null prototype] in parsedData.
         let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
 
         let listeners = listenersByType[parsedDate.type];
@@ -138,7 +138,7 @@ function Corrade(config) {
      * @property {string} parsedDate - returns data that is emitted from the tcp Interface.
      */
     this.on = function (type, cb) {
-        if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] += ' type: ' + type);
+        if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] + ' type: ' + type);
         if (!listenersByType[type]) {
             listenersByType[type] = [];
         }
@@ -402,6 +402,7 @@ function Corrade(config) {
                     command: command,
                     uuid: data.agent || data.owner ? data.agent || data.owner : null,
                     type: data.type,
+                    group: data.group ? data.group : null,
                     callbackUrl: callbackUrl
                 });
 
