@@ -89,8 +89,10 @@ function Corrade(config) {
      * @memberOf Corrade
      * @returns {Object} - returns readline interface object that emits events.
      */
+    var corradeSocket;
+
     function createSocket(options, group, password, types) {
-        let corradeSocket = tls.connect(options, function () {
+        corradeSocket = tls.connect(options, function () {
             corradeSocket.write('group=' + group + '&password=' + password + '&type=' + types.toString() + '\r\n');
         });
         corradeSocket.setKeepAlive(true);
@@ -163,6 +165,21 @@ function Corrade(config) {
 
 
     this.query = function (options, autoEscape) {
+      if (autoEscape) {
+        let keys = Object.keys(options);
+        let len = keys.length;
+        while (len--) {
+          options[keys[len]] = querystring.escape(options[keys[len]]);
+        }
+      }
+
+      options.group = _this.group;
+      options.password = _this.password;
+
+      corradeSocket.write(querystring.stringify(options)+'\r\n')
+    };
+
+    this.http_query = function (options, autoEscape) {
 
         if (autoEscape) {
             let keys = Object.keys(options);
