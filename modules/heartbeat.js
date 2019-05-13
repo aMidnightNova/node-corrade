@@ -1,4 +1,3 @@
-const helpers = require('../lib/helpers.js');
 
 
 let heartbeat = {};
@@ -13,9 +12,9 @@ heartbeat.func = function (_this, params) {
         data: 'AverageCPUUsage,AverageRAMUsage,Version,Uptime'
     }).then(function (res) {
         console.log('killroy', res.data)
-        let out = helpers.csv2arr(res.data, 2);
+        let out = _this.helpers.csv2arr(res.data, 2);
 
-        out = helpers.csv2Obj(out.toString(), 4, ['cpu', 'ram', 'version', 'uptime']);
+        out = _this.helpers.csv2Obj(out.toString(), 4, ['cpu', 'ram', 'version', 'uptime']);
 
         console.log('out', out[0])
         out = out[0];
