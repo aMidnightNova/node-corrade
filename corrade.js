@@ -83,13 +83,15 @@ function Corrade(config) {
         }
     }
 
+    var corradeSocket;
+    var rlInterface;
+
     /**
      * Establishes TCP connection with corrade.
      * @private
      * @memberOf Corrade
      * @returns {Object} - returns readline interface object that emits events.
      */
-    var corradeSocket;
 
     function createSocket(options, group, password, types) {
         corradeSocket = tls.connect(options, function () {
@@ -119,7 +121,7 @@ function Corrade(config) {
             createSocket(_this.options, _this.group, _this.password, _this.types);
         });
 
-        let rlInterface = rl.createInterface(corradeSocket, corradeSocket);
+        rlInterface = rl.createInterface(corradeSocket, corradeSocket);
 
         rlInterface.on('line', function (line) {
             handleReceivedLine(line);
@@ -164,7 +166,7 @@ function Corrade(config) {
      * */
 
 
-    this.query = function (options, autoEscape) {
+    this.tcp_query = function (options, autoEscape) {
       if (autoEscape) {
         let keys = Object.keys(options);
         let len = keys.length;
@@ -179,7 +181,7 @@ function Corrade(config) {
       corradeSocket.write(querystring.stringify(options)+'\r\n')
     };
 
-    this.http_query = function (options, autoEscape) {
+    this.query = function (options, autoEscape) {
 
         if (autoEscape) {
             let keys = Object.keys(options);
@@ -275,8 +277,9 @@ function Corrade(config) {
                 return Promise.reject(ERRORS[7]);
             })
 
+        } else {
+            return _this.REGISTERED_MODULES[moduleName].func(_this, params);
         }
-        return _this.REGISTERED_MODULES[moduleName].func(_this, params);
     };
 
 
