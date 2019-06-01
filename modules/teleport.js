@@ -34,8 +34,8 @@ teleport.func = function (_this, params) {
         _this.logs.append(`teleport -> pos: ${_pos}  region: ${_sim}`, 'general.log');
         return Promise.resolve(`teleport to ${_sim} @ ${_pos} complete`);
     }, function (err) {
-        _this.logs.append(err,'error.log');
-        return Promise.reject(err)
+        _this.logs.append(JSON.stringify(err),'error.log');
+        return Promise.reject(err);
     })
 
 
