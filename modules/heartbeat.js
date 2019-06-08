@@ -32,8 +32,6 @@ heartbeat.func = function (_this, params) {
         }
 
 
-
-
         let uptime = 'Days: ' + String(_days) + '   Hours: ' + String(_hours) + '   Minutes: ' + String(_minutes);
         let ram = (Number(out.ram) / 1024 / 1024).toFixed(2);
 
