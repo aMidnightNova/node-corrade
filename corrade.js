@@ -6,6 +6,7 @@ const querystring = require('querystring');
 
 const axios = require('axios');
 const Promise = require('bluebird');
+const uuid = require('uuid/v4')
 
 
 const ERRORS = require('./errors.js');
@@ -70,9 +71,23 @@ function Corrade(config) {
     this.REGISTERED_MODULES = {};
     this.INTERVALS = [];
 
+    let listenersByType = {};
+    let listenersWithTransactionUuid = [];
+
 
     function handleReceivedLine(line) { // it is safe to have [Object: null prototype] in parsedData.
         let parsedDate = querystring.parse(line.replace(/\r?\n|\r/g, ''));
+
+        if (parsedDate && parsedDate._transaction) {
+            for (let i = 0; listenersWithTransactionUuid.length > i; ++i) {
+                if (listenersWithTransactionUuid[i]._transaction === parsedDate._transaction) {
+                    listenersWithTransactionUuid[i].cb(parsedDate);
+                    listenersWithTransactionUuid.splice(i, 1);
+                    break;
+                }
+            }
+            return;
+        }
 
         let listeners = listenersByType[parsedDate.type];
 
@@ -82,6 +97,22 @@ function Corrade(config) {
             });
         }
     }
+
+    /**
+     * corrade emit event.
+     *
+     * @event Corrade#line
+     * @type {string}
+     * @property {string} parsedDate - returns data that is emitted from the tcp Interface.
+     */
+    this.on = function (type, cb) {
+        if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] + ' type: ' + type);
+        if (!listenersByType[type]) {
+            listenersByType[type] = [];
+        }
+        listenersByType[type].push(cb);
+    };
+
 
     var corradeSocket;
     var rlInterface;
@@ -133,22 +164,6 @@ function Corrade(config) {
     createSocket(this.options, this.group, this.password, this.types);
 
 
-    let listenersByType = {};
-    /**
-     * corrade emit event.
-     *
-     * @event Corrade#line
-     * @type {string}
-     * @property {string} parsedDate - returns data that is emitted from the tcp Interface.
-     */
-    this.on = function (type, cb) {
-        if (_this.types.indexOf(type) === -1) return cb(ERRORS[3] + ' type: ' + type);
-        if (!listenersByType[type]) {
-            listenersByType[type] = [];
-        }
-        listenersByType[type].push(cb);
-    };
-
     /** @function Corrade~query
      *
      * @param {object} options - case specific options needed to send a http(s) query to corrade.
@@ -166,22 +181,33 @@ function Corrade(config) {
      * */
 
 
-    this.tcp_query = function (options, autoEscape) {
-      if (autoEscape) {
-        let keys = Object.keys(options);
-        let len = keys.length;
-        while (len--) {
-          options[keys[len]] = querystring.escape(options[keys[len]]);
+    this.query = function (options, autoEscape) {
+        if (autoEscape) {
+            let keys = Object.keys(options);
+            let len = keys.length;
+            while (len--) {
+                options[keys[len]] = querystring.escape(options[keys[len]]);
+            }
         }
-      }
 
-      options.group = _this.group;
-      options.password = _this.password;
+        options.group = _this.group;
+        options.password = _this.password;
+        options._transaction = uuid();
 
-      corradeSocket.write(querystring.stringify(options)+'\r\n')
+        corradeSocket.write(querystring.stringify(options) + '\r\n');
+
+        return new Promise(function (resolve, reject) {
+
+            listenersWithTransactionUuid.push({
+                _transaction: options._transaction,
+                cb: resolve
+            });
+
+        });
+
     };
 
-    this.query = function (options, autoEscape) {
+    this.http_query = function (options, autoEscape) {
 
         if (autoEscape) {
             let keys = Object.keys(options);
