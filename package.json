@@ -9,9 +9,10 @@
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
     "moment-timezone": "^0.5.21",
+    "uuid": "^3.3.2",
     "yargs-parser": "^10.1.0"
   },
   "devDependencies": {
-    "jsdoc": "^3.5.5"
+    "jsdoc": "^3.6.2"
   }
 }
