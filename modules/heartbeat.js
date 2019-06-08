@@ -12,15 +12,26 @@ heartbeat.func = function (_this, params) {
         let out = _this.helpers.csv2arr(res.data, 2);
 
         out = _this.helpers.csv2Obj(out.toString(), 4, ['cpu', 'ram', 'version', 'uptime']);
-        
+
         out = out[0];
 
         let uptimeArr = out.uptime.split(':');
-        let daysAndHours = uptimeArr[0].split('.');
 
-        let _days = daysAndHours[0];
-        let _hours = daysAndHours[1];
+        let _days;
+        let _hours;
         let _minutes = uptimeArr[1];
+
+        if (uptimeArr[0].indexOf('.') !== -1) {
+            let daysAndHours = uptimeArr[0].split('.');
+
+            _days = daysAndHours[0];
+            _hours = daysAndHours[1];
+        } else {
+            _days = '00';
+            _hours = uptimeArr[0];
+        }
+
+
 
 
         let uptime = 'Days: ' + String(_days) + '   Hours: ' + String(_hours) + '   Minutes: ' + String(_minutes);
