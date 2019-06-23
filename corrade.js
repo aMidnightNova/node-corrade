@@ -334,7 +334,7 @@ function Corrade(config) {
                 command: 'getmembers',
                 sift: 'match,' + querystring.escape('(?i),?\\"([^\\",$]*' + arrayOfNames[i] + '[^\",$]*)\",?')
             }, false).then(function (res) {
-                if (!res) return Promise.reject(ERRORS[2]);
+                if (!res && res || !res.data) return Promise.reject(ERRORS[2]);
                 return res.data.replace(/["']/g, '');
             }));
         }
@@ -369,7 +369,8 @@ function Corrade(config) {
             return res;
 
         }).catch(function (err) {
-            console.log(err)
+            console.log(err);
+            return Promise.reject(err);
         })
     };
 
