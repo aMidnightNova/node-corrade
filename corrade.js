@@ -339,14 +339,15 @@ function Corrade(config) {
             }));
         }
 
-        return axios.all(calls).then(function (res) {
-
+        return Promise.all(calls).then(function (res) {
             res.forEach(function (item, index, arr) {
                 if (!item) {
                     arr.splice(index, 1);
                 }
             });
             return res;
+        }).catch(function (err) {
+            console.log('corradeGetGroupMembersByName', err)
         });
     };
 
@@ -369,7 +370,7 @@ function Corrade(config) {
             return res;
 
         }).catch(function (err) {
-            console.log(err);
+            console.log('corradeGetGroupMemberByName',err);
             return Promise.reject(err);
         })
     };
