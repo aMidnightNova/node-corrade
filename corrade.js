@@ -347,7 +347,8 @@ function Corrade(config) {
             });
             return res;
         }).catch(function (err) {
-            console.log('corradeGetGroupMembersByName', err)
+            console.log('corradeGetGroupMembersByName', err);
+            return Promise.reject(err);
         });
     };
 
