@@ -74,7 +74,7 @@ function Corrade(config, params) {
     this.REGISTERED_MODULES = {};
     this.INTERVALS = [];
     this.TOKENS = {
-        hardset: params.tokens || [],
+        hardset: params && params.tokens ? params.tokens : [],
         token_factory: [],
         get: function () {
             let _this = this;
