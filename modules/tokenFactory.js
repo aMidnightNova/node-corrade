@@ -7,13 +7,26 @@ let tokenFactory = {};
 
 tokenFactory.name = 'tokenfactory';
 
-tokenFactory.help = '[@~]tokenfactory :creates and saves a secret to use with corrade';
+tokenFactory.help = '[@~]tokenfactory --remove=[all|<token>] --generate (generates a token) --list (lists all tokens) : use one of the commands  ';
 
 tokenFactory.func = function (_this, params) {
     return new Promise(function (resolve, reject) {
 
 
         const commands = parser(params.messageAsString);
+
+        delete commands._
+
+        let commandKeys = Object.keys(commands);
+
+        if(commandKeys.length > 1) reject({code: 201, text: 'single command only'});
+
+
+        let index = ['remove','generate','list'].indexOf(commandKeys[0]);
+
+        if (index === -1) {
+            return reject({code: 201, text: 'invalid command sent'})
+        }
 
         if (typeof commands.remove !== 'undefined') {
             if (commands.remove === 'all') {
