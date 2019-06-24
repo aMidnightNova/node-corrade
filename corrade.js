@@ -28,6 +28,8 @@ const logs = require('./lib/logs.js');
  * @param {object} config.basicAuth - http basic auth credentials.
  * @param {string} config.basicAuth.user - http basis auth username.
  * @param {string} config.basicAuth.password - http basic auth password.
+ *
+ * @param {object} [params] - optional parameters to be stored internally for use by node-corrade
 
  * @example
  * let config = {};
@@ -46,7 +48,7 @@ const logs = require('./lib/logs.js');
  * let Corrade = require('./corrade.js');
  * let corrade = new Corrade(config);
  */
-function Corrade(config) {
+function Corrade(config, params) {
     let _this = this;
 
     this.protocol = config.protocol;
@@ -57,6 +59,7 @@ function Corrade(config) {
     this.types = config.types;
     this.basicAuth = typeof config.basicAuth !== 'undefined' ? config.basicAuth : null;
 
+    if (params) this.params = params;
 
     this.options = {
         host: config.host,
@@ -70,6 +73,14 @@ function Corrade(config) {
      */
     this.REGISTERED_MODULES = {};
     this.INTERVALS = [];
+    this.TOKENS = {
+        hardset: params.tokens || [],
+        token_factory: [],
+        get: function () {
+            let _this = this;
+            return this.hardset.concat(_this.token_factory)
+        }
+    };
 
     let listenersByType = {};
     let listenersWithTransactionUuid = [];
@@ -266,19 +277,30 @@ function Corrade(config) {
      * */
     this.loadModules = function (modules, authorizedRoles, allowedTypes) {
 
-        modules.forEach(function (item, index, arr) {//TODO: add check to make sure modules dont have the same name.
+        if (!Array.isArray(allowedTypes)) throw new Error('allowedTypes is not an array');
+
+        modules.forEach(function (item, index, arr) {
+            if (_this.REGISTERED_MODULES[item.name]) {
+                let errMsg = 'Module name already defined: ' + item.name;
+                throw new Error(errMsg);
+            }
             _this.REGISTERED_MODULES[item.name] = {
                 authorizedRoles: Array.isArray(authorizedRoles) ? authorizedRoles : null,
-                allowedTypes: Array.isArray(allowedTypes) ? allowedTypes : null,
+                allowedTypes: allowedTypes,
                 name: item.name,
                 help: Array.isArray(authorizedRoles) ? item.help + ' | Restricted to: ' + authorizedRoles.join(', ') : item.help,
                 func: item.func,
             };
-
+            if(typeof item.init !== "undefined"){
+                item.init(_this);
+            }
         });
 
 
     };
+
+    let help = require('./modules/preload/help.js');
+    this.loadModules([help], null, config.types);
 
     /** @function Corrade~runModule
      *
@@ -371,7 +393,7 @@ function Corrade(config) {
             return res;
 
         }).catch(function (err) {
-            console.log('corradeGetGroupMemberByName',err);
+            console.log('corradeGetGroupMemberByName', err);
             return Promise.reject(err);
         })
     };
@@ -396,12 +418,17 @@ function Corrade(config) {
         //let messageAsArray = split(data.message, {separator: ' ',keepQuotes: false});
 
         let callbackUrl = null;
-        let maybeMessageAndCallbackUrl = querystring.parse(data.message);
+        let maybeKVPMessage = querystring.parse(data.message);
 
         let message = '';
-        if (maybeMessageAndCallbackUrl.message) {
-            message = maybeMessageAndCallbackUrl.message;
-            callbackUrl = maybeMessageAndCallbackUrl.callback_url;
+        if (maybeKVPMessage.message) {
+            message = maybeKVPMessage.message;
+            callbackUrl = maybeKVPMessage.callback_url;
+            if (maybeKVPMessage.x_real_agent &&
+                this.TOKENS.get().indexOf(maybeKVPMessage.token) !== -1) {
+                data.agent = maybeKVPMessage.x_real_agent;
+            }
+
         } else {
             message = data.message;
         }
@@ -443,17 +470,35 @@ function Corrade(config) {
                     });
                 }
 
-                return resolve({
-                    lastName: data.lastname,
-                    firstName: data.firstname,
+                let _uuid = data.agent || data.owner ? data.agent || data.owner : null;
+
+                let objectToResolve = {
                     messageAsArray: messageAsArray,
                     messageAsString: message.match(/^(\S+)\s(.*)/) ? message.match(/^(\S+)\s(.*)/).slice(1)[1] : message,
                     command: command,
-                    uuid: data.agent || data.owner ? data.agent || data.owner : null,
+                    uuid: _uuid,
                     type: data.type,
                     group: data.group ? data.group : null,
                     callbackUrl: callbackUrl
-                });
+                };
+
+                if (!data.lastname && !data.lastname) {
+                    return _this.query({
+                        command: 'batchavatarkeytoname',
+                        avatars: _uuid
+                    }).then(function (res) {
+                        let names = helpers.csv2arr(res.data, 2)[0].split(" ");
+
+                        objectToResolve.lastName = names[0];
+                        objectToResolve.firstName = names[1];
+                        return resolve(objectToResolve)
+                    });
+                } else {
+                    objectToResolve.lastName = data.lastname;
+                    objectToResolve.firstName = data.firstname;
+                    return resolve(objectToResolve)
+                }
+
 
             }
             // return reject(ERRORS[1])//TODO: check if this is needed or to never resolve a promise is okay.

@@ -1,0 +1,9 @@
+#this is a comment
+
+BOT_UUID=<bot uuid>
+
+RELAY_COMMAND_HANDLE=teapot
+
+SHARED_SECRET=super_secret_key_goes_here
+
+
