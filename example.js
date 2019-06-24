@@ -27,7 +27,7 @@ let corrade = new Corrade(config, {tokens: ['your','hardset','tokens']});
 
 let joke = require('./modules/joke.js');
 let genericActions = require('./modules/genericActions.js');
-let generatesecret = require('./modules/tokenFactory.js');
+let tokenFactory = require('./modules/tokenFactory.js');
 let ban = require('./modules/ban.js');
 let events = require('./modules/events.js');
 let heartbeat = require('./modules/heartbeat.js');
@@ -36,7 +36,7 @@ let teleport = require('./modules/teleport.js');
 
 corrade.loadModules([joke], null, ['group', 'objectim','regionsayto']);
 corrade.loadModules(genericActions(['spank', 'poke', 'fluff', 'tickle', 'hug', 'nuzzle', 'potato']), null, ['group', 'objectim','regionsayto']);
-corrade.loadModules([generatesecret], ['Owners'], ['message']);
+corrade.loadModules([tokenFactory], ['Owners'], ['message']);
 corrade.loadModules([events], null, ['group', 'message', 'objectim','regionsayto']);
 corrade.loadModules([ban, heartbeat, teleport], ['Staff', 'Owners'], ['message', 'objectim','regionsayto']);
 

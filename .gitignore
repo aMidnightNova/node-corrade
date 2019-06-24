@@ -5,3 +5,5 @@
 /bower_components
 .idea
 flatfile.json
+test.js
+test2-dev.js

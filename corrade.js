@@ -13,6 +13,7 @@ const ERRORS = require('./errors.js');
 
 const auth = require('./models/authorization.js');
 const helpers = require('./lib/helpers.js');
+const flatjson = require('./lib/flatjson.js');
 const logs = require('./lib/logs.js');
 
 /**
@@ -333,6 +334,7 @@ function Corrade(config, params) {
 
     //this.isAuthorized = auth.isAuthorized;
     this.helpers = helpers;
+    this.flatjson = flatjson;
     this.logs = logs;
 
     /** @function Corrade~corradeGetGroupMembersByName
