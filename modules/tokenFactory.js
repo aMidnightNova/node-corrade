@@ -55,7 +55,7 @@ tokenFactory.func = function (_this, params) {
                 reject({code: 201, text: e})
             });
             // resolve(secret)
-        } else if (typeof commands.list !== 'undefined') {
+        } else if (typeof commands.list !== 'undefined') {// this should probably read tokes from in memory. -> this.TOKENS.get()
             _this.flatjson.get('tokens').then(function (tokens) {
                 resolve('\n' + tokens.join('\n'))
             }).catch(function (e) {
