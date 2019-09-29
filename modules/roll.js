@@ -1,6 +1,5 @@
 
 const fs = require('fs');
-const helpers = require('../lib/helpers.js');
 
 let roll = {};
 
@@ -30,7 +29,7 @@ roll.func = function (_this,params) {
                 return;
             }
         }
-        let out = helpers.randomNumber(1, number);
+        let out = _this.helpers.randomNumber(1, number);
         resolve(String(out))
     })
 
