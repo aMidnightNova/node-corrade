@@ -1,11 +1,11 @@
 
-const fs = require('fs');
+let Promise = require('bluebird');
 
 let roll = {};
 
 roll.name = 'roll';
 
-roll.help = '[@~]roll <number> :rolls a number between 0 and number., if no number is supplied it defaults to 100.';
+roll.help = '[@~]roll <number> : rolls a number between 0 and <number>. If no number is supplied it defaults to 100.';
 
 roll.func = function (_this,params) {
 

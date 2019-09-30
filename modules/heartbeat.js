@@ -1,4 +1,5 @@
 let heartbeat = {};
+let Promise = require('bluebird');
 
 heartbeat.name = 'heartbeat';
 

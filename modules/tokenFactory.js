@@ -1,6 +1,7 @@
 const parser = require('yargs-parser');
 
 const crypto = require('crypto');
+let Promise = require('bluebird');
 
 let tokenFactory = {};
 

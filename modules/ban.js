@@ -1,4 +1,5 @@
 const parser = require('yargs-parser');
+let Promise = require('bluebird');
 
 
 let ban = {};
