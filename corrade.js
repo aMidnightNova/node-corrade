@@ -442,7 +442,6 @@ function Corrade(config, params) {
 
 
         let messageAsArray = message.match(/(?:[^\s"]+|"[^"]*")+/g); //match(/[^\s"']+|"([^"]*)"|'([^']*)'/g);
-        console.log('messageAsArray',messageAsArray,data.message)
 
         messageAsArray.forEach(function (item, index, arr) {
             arr[index] = item.replace(/^"|"$/g, '').replace(/^'|'$/g, '');// - /["']/g
