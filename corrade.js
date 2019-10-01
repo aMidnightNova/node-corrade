@@ -420,7 +420,7 @@ function Corrade(config, params) {
         //let messageAsArray = split(data.message, {separator: ' ',keepQuotes: false});
 
         let callbackUrl = null;
-        let maybeKVPMessage = querystring.parse(data.message);
+        let maybeKVPMessage = querystring.parse(data.message.replace(/\+/g,"%2B"));
 
         let message = '';
         if (maybeKVPMessage.message) {
