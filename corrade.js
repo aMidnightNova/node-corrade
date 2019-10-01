@@ -420,7 +420,7 @@ function Corrade(config, params) {
         //let messageAsArray = split(data.message, {separator: ' ',keepQuotes: false});
 
         let callbackUrl = null;
-        let maybeKVPMessage = querystring.parse(data.message.replace(/\+/g,"%2B"));
+        let maybeKVPMessage = querystring.parse(data.message);
 
         let message = '';
         if (maybeKVPMessage.message) {
@@ -442,7 +442,7 @@ function Corrade(config, params) {
 
 
         let messageAsArray = message.match(/(?:[^\s"]+|"[^"]*")+/g); //match(/[^\s"']+|"([^"]*)"|'([^']*)'/g);
-
+        console.log('messageAsArray',messageAsArray,data.message)
 
         messageAsArray.forEach(function (item, index, arr) {
             arr[index] = item.replace(/^"|"$/g, '').replace(/^'|'$/g, '');// - /["']/g

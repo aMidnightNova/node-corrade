@@ -36,7 +36,7 @@ mrFormatThenIMBot(string msg, key person_who_said_command) {
 
     string message = wasKeyValueEncode(
     [
-    "message","@"+MESSAGE,
+    "message",wasURLEscape("@"+MESSAGE),
     "callback_url",CALLBACK_URL,
     "x_real_agent", person_who_said_command,
     "token",SHARED_SECRET
