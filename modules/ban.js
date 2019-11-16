@@ -33,7 +33,7 @@ ban.func = function (_this, params) {
         lastname: firstAndLast[1]
 
     }).then(function (res) {
-        _this.logs.append('ACTION: ' + banInfo.action + ', WHO: ' + banInfo.name  +', BY: ' + params.firstName + ' ' + params.lastName + ', REASON: ' + banInfo.reason, 'ban.log');
+        _this.logs.append('ban => ACTION: ' + banInfo.action + ', WHO: ' + banInfo.name  +', BY: ' + params.firstName + ' ' + params.lastName + ', REASON: ' + banInfo.reason, 'admin_actions.log');
         return Promise.resolve('the action \"' + banInfo.action + '\" for ' + banInfo.name + ' has been completed for the estate ban list.');
     }, function (err) {
         _this.logs.append(JSON.stringify(err), 'error.log');
